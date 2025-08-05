@@ -1,0 +1,33 @@
+# Node.js dependencies
+**/node_modules/
+node_modules/
+
+# Package manager lock files
+**/package-lock.json
+package-lock.json
+**/pnpm-lock.yaml
+pnpm-lock.yaml
+**/yarn.lock
+yarn.lock
+
+# Environment files
+**/.env
+.env
+**/.env.local
+.env.local
+**/.env.*.local
+.env.*.local
+**/.env.development
+.env.development
+**/.env.production
+.env.production
+**/.env.test
+.env.test
+
+# PNPM store (optional)
+.pnpm-store/
+**/.pnpm-store/
+
+# NPM cache (optional)
+.npm/
+**/.npm/
