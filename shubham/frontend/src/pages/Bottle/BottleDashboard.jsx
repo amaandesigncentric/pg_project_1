@@ -87,7 +87,7 @@ const BottleDashboard = ({ isEmbedded = false }) => {
   const headerConfig = {
     showGradient: !isEmbedded,
     showTime: !isEmbedded,
-    title: isEmbedded ? "Bottle Department" : "Welcome to Bottle Department!",
+    title: isEmbedded ? "Bottle Department" : "Welcome to Bottle Department !",
     mobileTitle: "Bottle"
   };
 

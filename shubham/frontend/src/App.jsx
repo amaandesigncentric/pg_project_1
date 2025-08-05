@@ -6,8 +6,8 @@ import BottleDashboard from './pages/Bottle/BottleDashboard'
 const App = () => {
   return (
     <div className='text-red-200'>
-      <Dashboard />
-     {/* <BottleDashboard /> */}
+      {/* <Dashboard /> */}
+     <BottleDashboard />
     </div>
   )
 }
