@@ -11,19 +11,19 @@ function App() {
   return (
     <Router>
       <AuthProvider>
-      <Routes>
-        <Route path='/' element={<Login />}  />
-        <Route 
-        path='/admin' 
-        element={
-          <ProtectedRoutes element={<Admin />} allowedRoutes={["admin"]} />
-        }
-        />
-        <Route 
-        path='/unauthorised-access'
-        element={<Unauthorized />}
-        />
-      </Routes>
+        <Routes>
+          <Route path='/' element={<Login />} />
+          <Route
+            path='/admin'
+            element={
+              <ProtectedRoutes element={<Admin />} allowedRoutes={["admin"]} />
+            }
+          />
+          <Route
+            path='/unauthorised-access'
+            element={<Unauthorized />}
+          />
+        </Routes>
       </AuthProvider>
     </Router>
   )
