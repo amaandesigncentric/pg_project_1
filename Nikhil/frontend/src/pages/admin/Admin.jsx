@@ -58,7 +58,7 @@ const Admin = () => {
         handleMenuClick={handleMenuClick}
       />
 
-      <nav className="hidden sm:block bg-white shadow-md border-b border-gray-200 relative z-40">
+      <nav className="hidden sm:block bg-white shadow-md border-b border-gray-200 relative">
         <div className="px-5">
           <div className="flex items-center">
             {mainMenuItems.map((item) => (

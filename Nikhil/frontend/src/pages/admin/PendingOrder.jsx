@@ -1,11 +1,13 @@
 import React from "react";
 import { Eye, ChevronRight, ChevronDown, Menu, Settings, Plus, ChevronLeft, CheckCircle } from 'lucide-react';
+import Createordermodal from "../../components/Createordermodal";
 
 const PendingOrders = () => {
     const [ordersPerPage, setOrdersPerPage] = React.useState(5);
-
+    const [openCreateOrder ,setOpenCreateOrder] = React.useState(false);
     const createOrders = () => {
-        console.log("Create Order")
+        console.log("Create Order");
+        setOpenCreateOrder(true);
     }
 
     const handleOrdersPerPageChange = (value) => {
@@ -31,7 +33,7 @@ const PendingOrders = () => {
                                     onChange={(e) => handleOrdersPerPageChange(e.target.value)}
                                     className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500"
                                 >
-                                    <option value={5}>5</option>
+                                    <option className="bg-orange-600" value={5}>5</option>
                                     <option value={10}>10</option>
                                     <option value={15}>15</option>
                                 </select>
@@ -41,6 +43,13 @@ const PendingOrders = () => {
                     </div>
                 </div>
             </main>
+            
+            
+            <Createordermodal 
+            openCreateOrder={openCreateOrder} 
+            setOpenCreateOrder={setOpenCreateOrder} 
+            />
+           
         </div>
     )
 }
