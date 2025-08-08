@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../utils/useAuth';
+import { useAuth } from '../../context/useAuth';
 
 
 const Login = () => {
@@ -17,7 +17,7 @@ const Login = () => {
   }, [user]);
 
   const redirectUser = (userData) => {
-    if (userData.position === 'admin' || userData.position === "ast_sales_manager") {
+    if (userData.position === 'admin' || userData.position === "deco_admin") {
       navigate('/admin');
     } else if (userData.position === 'team') {
       navigate('/team');

@@ -1,4 +1,4 @@
-const bootleData = [
+const bottleData = [
   {
     bootleName: "AquaPro Slim",
     neckSize: "28mm",
@@ -26,4 +26,4 @@ const bootleData = [
   }
 ];
 
-export default bootleData;
+export default bottleData;

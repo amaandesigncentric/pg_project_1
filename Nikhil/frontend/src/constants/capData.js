@@ -1,29 +1,24 @@
 const capData = [
   {
     capType: "ALU",
-    capName: "Aluminium Twist Cap",
+    capName: "Plain",
     moundNo: "MND-001"
   },
   {
     capType: "PLASTIC",
-    capName: "Plastic Flip Top Cap",
+    capName: "Plain",
     moundNo: "MND-002"
   },
   {
     capType: "ALU",
-    capName: "Brushed Metal Cap",
+    capName: "Metalized",
     moundNo: "MND-003"
   },
   {
     capType: "PLASTIC",
-    capName: "Plastic Snap Cap",
+    capName: "UV Metalized",
     moundNo: "MND-004"
-  },
-  {
-    capType: "PLASTIC",
-    capName: "Plastic Screw Cap",
-    moundNo: "MND-005"
   }
-];
+]
 
 export default capData;

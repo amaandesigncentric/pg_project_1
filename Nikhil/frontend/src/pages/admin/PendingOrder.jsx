@@ -1,6 +1,6 @@
 import React from "react";
 import { Eye, ChevronRight, ChevronDown, Menu, Settings, Plus, ChevronLeft, CheckCircle } from 'lucide-react';
-import Createordermodal from "../../components/Createordermodal";
+import Createordermodal from "./Createordermodal";
 
 const PendingOrders = () => {
     const [ordersPerPage, setOrdersPerPage] = React.useState(5);

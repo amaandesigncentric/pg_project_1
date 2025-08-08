@@ -9,6 +9,12 @@ const AuthProvider = ({children})=>{
   return storedUser ? JSON.parse(storedUser) : null;
 });
   const navigate = useNavigate();
+  const [dataStore, setDataStore] = useState({
+    pumps: [],
+    caps: [],
+    glass: [],
+    accessories: [],
+  });
 
   const login  = (user)=>{
     setUser(user);
@@ -17,7 +23,7 @@ const AuthProvider = ({children})=>{
 
   const logout = ()=>{
     setUser(null);
-    localStorage.removeItem("user_data");
+    localStorage.clear();
     navigate("/");
   }
 

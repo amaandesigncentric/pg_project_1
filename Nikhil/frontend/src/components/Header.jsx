@@ -1,5 +1,5 @@
 import React from "react";
-import { useAuth } from "../utils/useAuth";
+import { useAuth } from "../context/useAuth";
 import { FaPowerOff } from "react-icons/fa6";
 import { ChevronRight, ChevronDown, Menu, ChevronLeft, } from 'lucide-react';
 
