@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Menu, ChevronLeft } from 'lucide-react';
 import { FaPowerOff } from "react-icons/fa";
 import SharedHeader from '../../components/SharedHeader.jsx';
-import BottleOrders from './BottleOrders.jsx';
 import { useCurrentDateTime } from '../../hooks/useCurrentDateTime.jsx';
+import PrintingOrders from './PrintingOrders.jsx';
 
-const BottleDashboard = ({ isEmbedded = false }) => {
+const PrintingDashboard = ({ isEmbedded = false }) => {
   const [activeMenuItem, setActiveMenuItem] = useState('liveOrders');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { currentDateTime, formatTime, formatTimeMobile } = useCurrentDateTime();
@@ -28,9 +28,9 @@ const BottleDashboard = ({ isEmbedded = false }) => {
   const renderActiveComponent = () => {
     switch (activeMenuItem) {
       case 'liveOrders':
-        return <BottleOrders orderType="pending" />;
+        return <PrintingOrders orderType="pending" />;
       case 'completedOrders':
-        return <BottleOrders orderType="completed" />;
+        return <PrintingOrders orderType="completed" />;
       default:
         return (
           <div className="p-4">
@@ -48,8 +48,8 @@ const BottleDashboard = ({ isEmbedded = false }) => {
   const headerConfig = {
     showGradient: !isEmbedded,
     showTime: !isEmbedded,
-    title: isEmbedded ? "Bottle Department" : "Welcome to Bottle Department !",
-    mobileTitle: "Bottle"
+    title: isEmbedded ? "Printing Department" : "Welcome to Printing Department !",
+    mobileTitle: "Printing"
   };
 
   return (
@@ -132,4 +132,4 @@ const BottleDashboard = ({ isEmbedded = false }) => {
   );
 };
 
-export default BottleDashboard;
+export default PrintingDashboard;

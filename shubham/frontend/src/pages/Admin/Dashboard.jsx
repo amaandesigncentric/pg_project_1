@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import {  ChevronRight, ChevronDown, Menu,  ChevronLeft, } from 'lucide-react';
+import { ChevronRight, ChevronDown, Menu, ChevronLeft, } from 'lucide-react';
 import { FaPowerOff } from "react-icons/fa";
 import PendingOrders from './PendingOrders';
 import LiveOrders from './LiveOrders';
 import CompletedOrders from './CompletedOrders';
 import Analytics from './Analytics';
 import BottleDashboard from '../Bottle/BottleDashboard';
+import { useCurrentDateTime } from '../../hooks/useCurrentDateTime';
+import PrintingDashboard from '../Printing/PrintingDashbaord';
 
 
 const Dashboard = () => {
@@ -13,41 +15,12 @@ const Dashboard = () => {
   const [departmentsExpanded, setDepartmentsExpanded] = useState(false);
   const [masterExpanded, setMasterExpanded] = useState(false);
   const [decorationExpanded, setDecorationExpanded] = useState(false);
-  const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentDateTime(new Date());
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  const formatTime = (date) => {
-    return date.toLocaleString('en-US', {
-      weekday: 'short',
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
-
-  const formatTimeMobile = (date) => {
-    return date.toLocaleString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-  };
+  const { currentDateTime, formatTime, formatTimeMobile } = useCurrentDateTime();
 
   const handleLogout = () => {
     console.log('Logout clicked');
   };
-
 
   const mainMenuItems = [
     { id: 'dashboard', label: 'Dashboard' },
@@ -81,11 +54,11 @@ const Dashboard = () => {
   ];
 
   const decorationSubItems = [
-    { id: 'decoPrint', label: 'Print' },
-    { id: 'decoCoat', label: 'Coat' },
-    { id: 'decoFoil', label: 'Foil' },
-    { id: 'decoFrost', label: 'Frost' },
-    { id: 'decoMetallised', label: 'Metallised' }
+    { id: 'printing', label: 'Print' },
+    { id: 'coating', label: 'Coat' },
+    { id: 'foiling', label: 'Foil' },
+    { id: 'frosting', label: 'Frost' },
+    { id: 'netalized', label: 'Metallised' }
   ];
 
   const handleMenuClick = (itemId) => {
@@ -140,12 +113,18 @@ const Dashboard = () => {
         return <LiveOrders />;
       case 'completedOrders':
         return <CompletedOrders />;
-     case 'bottle':
-  return (
-    <div className='mt-2'>
-      <BottleDashboard isEmbedded={true} />
-    </div>
-  );
+      case 'bottle':
+        return (
+          <div className='mt-2'>
+            <BottleDashboard isEmbedded={true} />
+          </div>
+        );
+      case 'printing':
+        return (
+          <div className='mt-2'>
+            <PrintingDashboard isEmbedded={true} />
+          </div>
+        );
       default:
         return (
           <div className="p-4">

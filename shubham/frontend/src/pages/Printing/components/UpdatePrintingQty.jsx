@@ -3,18 +3,19 @@ import { Dialog, DialogBackdrop, DialogPanel, DialogTitle } from '@headlessui/re
 import { X, Save, CloudHail } from 'lucide-react';
 import axios from 'axios';
 
-const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities = {}, onUpdate }) => {
+const UpdatePrintingQty = ({ isOpen, onClose, orderData, itemData, stockQuantities = {}, onUpdate }) => {
   const [assignments, setAssignments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    if (isOpen && itemData?.bottle) {
-      setAssignments(itemData.bottle.map(bottle => {
-        const stockQty = parseInt(stockQuantities[bottle.deco_no]) || 0;
+    if (isOpen && itemData?.printing) {
+      setAssignments(itemData.printing.map(printing => {
+        // Fixed: Use printing_id to match stockQuantities keys
+        const stockQty = parseInt(stockQuantities[printing.printing_id]) || 0;
         return {
-          ...bottle,
+          ...printing,
           todayQty: stockQty,
           notes: stockQty > 0 ? 'Used from existing stock' : ''
         };
@@ -26,15 +27,14 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
 
   const handleQuantityChange = (assignmentIndex, value) => {
     const newAssignments = [...assignments];
-    const stockUsed = parseInt(stockQuantities[newAssignments[assignmentIndex].deco_no]) || 0;
-
+    // Fixed: Use printing_id instead of deco_no for consistency
+    const stockUsed = parseInt(stockQuantities[newAssignments[assignmentIndex].printing_id]) || 0;
     if (value === '') {
       newAssignments[assignmentIndex].todayQty = stockUsed;
     } else {
       const parsed = parseInt(value, 10);
       newAssignments[assignmentIndex].todayQty = isNaN(parsed) ? stockUsed : Math.max(stockUsed, parsed);
     }
-
     setAssignments(newAssignments);
   };
 
@@ -44,16 +44,16 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
     setAssignments(newAssignments);
   };
 
-  const calculateProgress = (bottle) => {
-    const completed = bottle.completed_qty || 0;
-    const total = bottle.quantity || 0;
+  const calculateProgress = (printing) => {
+    const completed = printing.completed_qty || 0;
+    const total = printing.quantity || 0;
     return total > 0 ? Math.min((completed / total) * 100, 100) : 0;
   };
 
-  const calculateNewProgress = (bottle, todayQty) => {
-    const currentCompleted = bottle.completed_qty || 0;
+  const calculateNewProgress = (printing, todayQty) => {
+    const currentCompleted = printing.completed_qty || 0;
     const newCompleted = currentCompleted + (todayQty || 0);
-    const total = bottle.quantity || 0;
+    const total = printing.quantity || 0;
     return total > 0 ? Math.min((newCompleted / total) * 100, 100) : 0;
   };
 
@@ -66,12 +66,10 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
       <div className="w-full flex items-center space-x-2">
         <div className="flex-1 p-[1px] rounded-full bg-gradient-to-r from-orange-800 via-orange-600 to-orange-500">
           <div className="bg-white rounded-full h-3 sm:h-4 px-1 flex items-center overflow-hidden">
-            {/* Existing progress */}
             <div
               className="bg-orange-600 h-1.5 sm:h-2.5 rounded-full transition-all duration-300"
               style={{ width: `${currentProgress}%` }}
             />
-            {/* New progress overlay */}
             {addedProgress > 0 && (
               <div
                 className="bg-green-500 h-1.5 sm:h-2.5 rounded-full transition-all duration-300 -ml-1"
@@ -87,11 +85,13 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
     );
   };
 
-  const getRemainingQty = (bottle) => {
-    const completed = bottle.completed_qty || 0;
-    const total = bottle.quantity || 0;
-    return Math.max(total - completed, 0);
-  };
+  const getRemainingQty = (assignment) => {
+  const completed = assignment.completed_qty || 0;
+  const todayQty = assignment.todayQty || 0;
+  const total = assignment.quantity || 0;
+  return Math.max(total - completed - todayQty, 0);
+};
+
 
   const handleSave = async () => {
     try {
@@ -102,12 +102,13 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
         .filter(assignment => assignment.todayQty > 0)
         .map(assignment => {
           const currentCompleted = assignment.completed_qty || 0;
-          const stockUsed = stockQuantities[assignment.deco_no] || 0;
+          // Fixed: Use printing_id instead of deco_no
+          const stockUsed = stockQuantities[assignment.printing_id] || 0;
           const newProduction = Math.max(0, assignment.todayQty - stockUsed);
           const newCompleted = currentCompleted + assignment.todayQty;
 
           return {
-            deco_no: assignment.deco_no,
+            printing_id: assignment.printing_id,
             quantity_produced: newProduction,
             stock_used: stockUsed,
             total_completed: newCompleted,
@@ -119,12 +120,11 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
         });
 
       if (updates.length === 0) {
-        setError('Please enter quantity for at least one bottle');
+        setError('Please enter quantity for at least one printing');
         setLoading(false);
         return;
       }
 
-      // Validation
       for (let i = 0; i < updates.length; i++) {
         const assignment = assignments[i];
         const remaining = getRemainingQty(assignment);
@@ -136,8 +136,7 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
         }
       }
 
-      // Use the new API endpoint
-      const response = await axios.patch('http://localhost:3001/api/bottles/update-progress', {
+      const response = await axios.patch('http://localhost:3001/api/printing/update-progress', {
         orderNumber: orderData.order_number,
         itemId: itemData._id,
         updates
@@ -172,8 +171,7 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
-      <DialogBackdrop className="fixed inset-0 bg-gray-500/75 transition-opacity " />
-
+      <DialogBackdrop className="fixed inset-0 bg-gray-500/75 transition-opacity" />
       <div className="fixed inset-0 overflow-y-auto">
         <div className="flex min-h-full items-center justify-center p-2 sm:p-4">
           <DialogPanel className="w-full max-w-sm sm:max-w-4xl lg:max-w-7xl transform overflow-hidden rounded-lg bg-white shadow-xl transition-all">
@@ -182,7 +180,7 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
             <div className="bg-orange-600 text-white px-3 sm:px-4 py-3 flex justify-between items-start gap-4 rounded-t-lg">
               <div className="min-w-0 flex-1">
                 <DialogTitle as="h2" className="text-lg sm:text-xl font-bold">
-                  Update Bottle Production
+                  Update Printing Production
                 </DialogTitle>
                 <p className="text-orange-100 text-xs sm:text-sm mt-1 truncate">
                   Order #{orderData?.order_number} - {itemData?.item_name}
@@ -195,8 +193,6 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
                 <X size={20} className="sm:w-6 sm:h-6" />
               </button>
             </div>
-
-            {/* Error/Success Messages */}
             {(error || successMessage) && (
               <div className="px-3 sm:px-6 py-2 sm:py-4 border-b">
                 {error && (
@@ -212,15 +208,14 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
               </div>
             )}
 
-            {/* Desktop Table Header */}
             <div className="hidden lg:block bg-gradient-to-r from-orange-800 via-orange-600 to-orange-400 px-4 py-3 mt-4 mx-4 rounded-md">
               <div className="grid gap-4 text-white font-semibold text-sm items-center"
                 style={{
                   gridTemplateColumns: '2fr 1fr 1fr 1fr 1fr 1fr 2fr 1.5fr'
                 }}>
-                <div className="text-left">Bottle Name</div>
-                <div className="text-center">Neck Size</div>
-                <div className="text-center">Capacity</div>
+                <div className="text-left">Printing Name</div>
+                <div className="text-center">Design</div>
+                <div className="text-center">Size</div>
                 <div className="text-center">Total Qty</div>
                 <div className="text-center">Remaining</div>
                 <div className="text-center">Stock Used</div>
@@ -229,18 +224,17 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
               </div>
             </div>
 
-            {/* Assignments List */}
             <div className="max-h-[50vh] sm:max-h-96 overflow-y-auto p-3 sm:p-6">
               {assignments.map((assignment, index) => {
                 const remaining = getRemainingQty(assignment);
                 const isCompleted = remaining === 0;
-                const stockUsed = stockQuantities[assignment.deco_no] || 0;
+                // Fixed: Use printing_id instead of deco_no
+                const stockUsed = stockQuantities[assignment.printing_id] || 0;
                 const colorClasses = ['bg-orange-50', 'bg-orange-100', 'bg-yellow-50', 'bg-yellow-100'];
                 const bgColor = colorClasses[index % colorClasses.length];
 
                 return (
-                  <div key={assignment.deco_no} className="mb-4 last:mb-0">
-                    {/* Desktop Layout */}
+                  <div key={assignment.printing_id} className="mb-4 last:mb-0">
                     <div className={`hidden lg:block border-b border-orange-100 px-6 py-4 ${bgColor} -mx-6`}>
                       <div className="grid gap-4 text-sm items-center"
                         style={{
@@ -250,16 +244,16 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
                         <div className="text-left">
                           <div className="font-medium text-orange-900">{assignment.bottle_name}</div>
                           <div className="text-xs text-gray-600">
-                            Deco #{assignment.deco_no}
+                            ID #{assignment.printing_id}
                           </div>
                         </div>
 
                         <div className="text-center text-orange-900">
-                          {assignment.neck_size}mm
+                          {assignment.design_name || 'No Design'}
                         </div>
 
                         <div className="text-center text-orange-900">
-                          {assignment.capacity}
+                          {assignment.neck_size}mm
                         </div>
 
                         <div className="text-center text-orange-900 font-medium">
@@ -271,7 +265,6 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
                             {remaining}
                           </span>
                         </div>
-
                         <div className="text-center">
                           <span className="font-semibold text-blue-600">
                             {stockUsed}
@@ -323,25 +316,20 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
                         </div>
                       </div>
                     </div>
-
-                    {/* Mobile/Tablet Layout */}
                     <div className={`lg:hidden ${bgColor} rounded-lg p-3 sm:p-4`}>
                       <div className="space-y-3">
-                        {/* Header Info */}
                         <div className="border-b border-gray-200 pb-3">
                           <h4 className="font-medium text-orange-900 text-sm sm:text-base">{assignment.bottle_name}</h4>
-                          <p className="text-xs text-gray-600 mt-1">Deco #{assignment.deco_no}</p>
+                          <p className="text-xs text-gray-600 mt-1">ID #{assignment.printing_id}</p>
                         </div>
-
-                        {/* Stats Grid */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs sm:text-sm">
+                          <div>
+                            <span className="text-gray-600">Design:</span>
+                            <div className="font-medium text-orange-900">{assignment.design_name || 'No Design'}</div>
+                          </div>
                           <div>
                             <span className="text-gray-600">Size:</span>
                             <div className="font-medium text-orange-900">{assignment.neck_size}mm</div>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Capacity:</span>
-                            <div className="font-medium text-orange-900">{assignment.capacity}</div>
                           </div>
                           <div>
                             <span className="text-gray-600">Total:</span>
@@ -354,16 +342,12 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
                             </div>
                           </div>
                         </div>
-
-                        {/* Stock Used */}
                         {stockUsed > 0 && (
                           <div className="bg-blue-50 rounded-md p-2">
                             <span className="text-xs text-gray-600">Stock Used:</span>
                             <div className="font-semibold text-blue-600">{stockUsed}</div>
                           </div>
                         )}
-
-                        {/* Progress Bar */}
                         <div>
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-xs text-gray-600">Progress:</span>
@@ -376,8 +360,6 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
                             todayQty={assignment.todayQty || 0}
                           />
                         </div>
-
-                        {/* Input Section */}
                         {!isCompleted ? (
                           <div className="space-y-3 pt-2 border-t border-gray-200">
                             <div>
@@ -421,8 +403,6 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
                 );
               })}
             </div>
-
-            {/* Action Buttons */}
             <div className="bg-gray-50 px-3 sm:px-6 py-3 sm:py-4 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3 border-t">
               <button
                 onClick={onClose}
@@ -455,4 +435,4 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
   );
 };
 
-export default UpdateBottleQty;
+export default UpdatePrintingQty;

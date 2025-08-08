@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Package, Edit, ChevronLeft, ChevronRight, Eye, EyeOff } from 'lucide-react';
-import StockAvailabilityDialog from './components/StockAvailabilityDialog.jsx';
-import OrderTable from './components/OrderTable.jsx';
-import UpdateBottleQty from './components/UpdateBottleQty.jsx';
+import { Package, ChevronLeft, ChevronRight } from 'lucide-react';
 import { getLocalStorageData, getStorageKeys, initializeLocalStorage, moveOrderInStorage, updateOrderInStorage } from '../../utils/orderStorage.jsx';
 import TeamSearchAggregation from '../../utils/TeamSearchAggregation.jsx';
+import UpdatePrintingQty from './components/UpdatePrintingQty.jsx';
+import StockAvailabilityDialog from './components/StockAvailabilityDialog.jsx';
+import OrderTable from './components/orderTable.jsx';
 
-
-const BottleOrders = ({ orderType = 'pending' }) => {
+const PrintingOrders = ({ orderType = 'pending' }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -15,32 +14,32 @@ const BottleOrders = ({ orderType = 'pending' }) => {
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [aggregatedBottles, setAggregatedBottles] = useState({});
+  const [aggregatedPrintings, setAggregatedPrintings] = useState({});
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedItem, setSelectedItem] = useState(null);
   const [showStockDialog, setShowStockDialog] = useState(false);
   const [stockQuantities, setStockQuantities] = useState({});
   const ordersPerPage = 5;
-  const TEAM = 'bottle';
+  const TEAM = 'printing';
   const STORAGE_KEYS = getStorageKeys(TEAM);
 
   const isOrderCompleted = (order) => {
     if (!order.items || order.items.length === 0) return false;
     return order.items.every(item => {
-      const bottles = item.bottle || [];
-      if (bottles.length === 0) return true;
-      return bottles.every(bottle => bottle.status === 'Completed');
+      const printings = item.printing || [];
+      if (printings.length === 0) return true;
+      return printings.every(printing => printing.status === 'Completed');
     });
   };
 
-  const filterBottleOrders = (items) => {
-    return items.filter(item => item.bottle && item.bottle.length > 0);
+  const filterPrintingOrders = (items) => {
+    return items.filter(item => item.printing && item.printing.length > 0);
   };
 
-  const initializeBottleStorage = async () => {
+  const initializePrintingStorage = async () => {
     try {
       console.log('Initializing localStorage with fresh API data...');
-      return await initializeLocalStorage(TEAM, isOrderCompleted, filterBottleOrders);
+      return await initializeLocalStorage(TEAM, isOrderCompleted, filterPrintingOrders);
     } catch (error) {
       console.error('Error initializing localStorage:', error);
       throw error;
@@ -59,7 +58,7 @@ const BottleOrders = ({ orderType = 'pending' }) => {
           pendingOrders = pendingData;
           completedOrders = completedData;
         } else {
-          const initialized = await initializeBottleStorage();
+          const initialized = await initializePrintingStorage();
           pendingOrders = initialized.pendingOrders;
           completedOrders = initialized.completedOrders;
         }
@@ -95,46 +94,46 @@ const BottleOrders = ({ orderType = 'pending' }) => {
   }, [orderType]);
 
   useEffect(() => {
-    const calculateAggregatedBottles = () => {
-      const bottleMap = {};
+    const calculateAggregatedPrintings = () => {
+      const printingMap = {};
       orders.forEach(order => {
         order.items?.forEach(item => {
-          const bottles = item.bottle || [];
-          bottles.forEach(bottle => {
-            const key = bottle.bottle_name?.toLowerCase().trim();
+          const printings = item.printing || [];
+          printings.forEach(printing => {
+            const key = `${printing.bottle_name}`.toLowerCase().trim();
             if (key) {
-              if (!bottleMap[key]) {
-                bottleMap[key] = {
-                  bottle_name: bottle.bottle_name,
-                  neck_size: bottle.neck_size,
-                  capacity: bottle.capacity,
+              if (!printingMap[key]) {
+                printingMap[key] = {
+                  printing: printing.bottle_name,
+
                   total_quantity: 0,
                   total_remaining: 0,
-                  available_stock: bottle.available_stock || 0,
+                  available_stock: printing.available_stock || 0,
                   orders: []
                 };
               }
 
-              const remaining = getRemainingQty(bottle);
-              bottleMap[key].total_quantity += bottle.quantity || 0;
-              bottleMap[key].total_remaining += remaining;
-              bottleMap[key].orders.push({
+              const remaining = getRemainingQty(printing);
+              printingMap[key].total_quantity += printing.quantity || 0;
+              printingMap[key].total_remaining += remaining;
+              printingMap[key].orders.push({
                 order_number: order.order_number,
                 item_name: item.item_name,
-                quantity: bottle.quantity,
+                quantity: printing.quantity,
                 remaining: remaining,
-                deco_no: bottle.deco_no,
-                status: bottle.status
+                printing_id: printing.printing_id,
+                status: printing.status
               });
             }
           });
         });
       });
+      console.log(printingMap)
 
-      setAggregatedBottles(bottleMap);
+      setAggregatedPrintings(printingMap);
     };
 
-    calculateAggregatedBottles();
+    calculateAggregatedPrintings();
   }, [orders]);
 
   const filteredOrders = orders.filter(order => {
@@ -148,8 +147,9 @@ const BottleOrders = ({ orderType = 'pending' }) => {
 
     return order.items?.some(item => {
       if (item.item_name?.toLowerCase().includes(searchLower)) return true;
-      return item.bottle?.some(bottle =>
-        bottle.bottle_name?.toLowerCase().includes(searchLower)
+      return item.printing?.some(printing =>
+        printing.bottle_name?.toLowerCase().includes(searchLower)
+
       );
     });
   }).map(order => {
@@ -164,13 +164,14 @@ const BottleOrders = ({ orderType = 'pending' }) => {
         if (item.item_name?.toLowerCase().includes(searchLower)) {
           return item;
         }
-        const filteredBottles = item.bottle?.filter(bottle =>
-          bottle.bottle_name?.toLowerCase().includes(searchLower)
+        const filteredPrintings = item.printing?.filter(printing =>
+          printing.bottle_name?.toLowerCase().includes(searchLower)
+
         ) || [];
-        if (filteredBottles.length > 0) {
+        if (filteredPrintings.length > 0) {
           return {
             ...item,
-            bottle: filteredBottles
+            printing: filteredPrintings
           };
         }
         return null;
@@ -188,11 +189,11 @@ const BottleOrders = ({ orderType = 'pending' }) => {
     return order;
   }).filter(order => order !== null);
 
-  const getRemainingQty = (bottle) => {
-    if (!bottle || !bottle.quantity) return 'N/A';
-    if (bottle.status === 'Completed') return 0;
-    const totalQuantity = bottle.quantity || 0;
-    const completedQty = bottle.completed_qty || 0;
+  const getRemainingQty = (printing) => {
+    if (!printing || !printing.quantity) return 'N/A';
+    if (printing.status === 'Completed') return 0;
+    const totalQuantity = printing.quantity || 0;
+    const completedQty = printing.completed_qty || 0;
     const remaining = totalQuantity - completedQty;
 
     return Math.max(0, remaining);
@@ -231,15 +232,16 @@ const BottleOrders = ({ orderType = 'pending' }) => {
   };
 
   const handleEditClick = (order, item) => {
+    console.log(item)
     setSelectedOrder(order);
     setSelectedItem(item);
     setShowStockDialog(true);
   };
 
-  const handleStockQuantityChange = (bottleId, value) => {
+  const handleStockQuantityChange = (printingId, value) => {
     setStockQuantities(prev => ({
       ...prev,
-      [bottleId]: value
+      [printingId]: value
     }));
   };
 
@@ -268,7 +270,7 @@ const BottleOrders = ({ orderType = 'pending' }) => {
     setSelectedItem(null);
   };
 
-  const handleCopyBottleName = (bottleName) => {
+  const handleCopyPrintingName = (bottleName) => {
     setSearchTerm(bottleName);
     setCurrentPage(1);
   };
@@ -289,7 +291,6 @@ const BottleOrders = ({ orderType = 'pending' }) => {
 
     if (wasCompleted !== isNowCompleted) {
       if (isNowCompleted) {
-        console.log(`Order ${updatedOrder.order_number} completed - moving to completed storage`);
         moveOrderInStorage(TEAM, updatedOrder.order_number, 'pending', 'completed');
         updateOrderInStorage(TEAM, updatedOrder, 'completed');
         if (orderType === 'pending') {
@@ -299,7 +300,6 @@ const BottleOrders = ({ orderType = 'pending' }) => {
           setOrders(filteredOrders);
         }
       } else {
-        console.log(`Order ${updatedOrder.order_number} moved back to pending`);
         moveOrderInStorage(TEAM, updatedOrder.order_number, 'completed', 'pending');
         updateOrderInStorage(TEAM, updatedOrder, 'pending');
         if (orderType === 'completed') {
@@ -317,9 +317,69 @@ const BottleOrders = ({ orderType = 'pending' }) => {
       );
       setOrders(updatedOrders);
     }
-
     handleClose();
   };
+
+  const handlePartiallyReceivedChange = (printingId, checked) => {
+  setOrders(prevOrders => {
+    const updatedOrders = prevOrders.map(order => ({
+      ...order,
+      items: order.items.map(item => ({
+        ...item,
+        printing: item.printing.map(print =>
+          print.printing_id === printingId
+            ? { ...print, is_partially_received: checked }
+            : print
+        )
+      }))
+    }));
+
+    // Find the updated order to persist to localStorage
+    const updatedOrder = updatedOrders.find(order =>
+      order.items.some(item =>
+        item.printing.some(print => print.printing_id === printingId)
+      )
+    );
+
+    if (updatedOrder) {
+      // Determine current status and update localStorage
+      const currentStatus = isOrderCompleted(updatedOrder) ? 'completed' : 'pending';
+      updateOrderInStorage(TEAM, updatedOrder, currentStatus);
+    }
+
+    return updatedOrders;
+  });
+};
+
+const handleCompletelyReceivedChange = (printingId, checked) => {
+  setOrders(prevOrders => {
+    const updatedOrders = prevOrders.map(order => ({
+      ...order,
+      items: order.items.map(item => ({
+        ...item,
+        printing: item.printing.map(print =>
+          print.printing_id === printingId
+            ? { ...print, is_completely_received: checked }
+            : print
+        )
+      }))
+    }));
+
+    const updatedOrder = updatedOrders.find(order =>
+      order.items.some(item =>
+        item.printing.some(print => print.printing_id === printingId)
+      )
+    );
+
+    if (updatedOrder) {
+      const currentStatus = isOrderCompleted(updatedOrder) ? 'completed' : 'pending';
+      updateOrderInStorage(TEAM, updatedOrder, currentStatus);
+    }
+
+    return updatedOrders;
+  });
+};
+
 
   if (loading) {
     return (
@@ -405,10 +465,10 @@ const BottleOrders = ({ orderType = 'pending' }) => {
   return (
     <div className="p-5 max-w-full overflow-hidden">
       <TeamSearchAggregation
-        teamType="bottle"
+        teamType="printing"
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        aggregatedItems={aggregatedBottles}
+        aggregatedItems={aggregatedPrintings}
         setCurrentPage={setCurrentPage}
       />
 
@@ -419,10 +479,12 @@ const BottleOrders = ({ orderType = 'pending' }) => {
         handleEditClick={handleEditClick}
         handleSearchCustomer={handleSearchCustomer}
         handleSearchManager={handleSearchManager}
-        handleCopyBottleName={handleCopyBottleName}
+        handleCopyPrintingName={handleCopyPrintingName}
         expandedRows={expandedRows}
         toggleRowExpansion={toggleRowExpansion}
         getStatusStyle={getStatusStyle}
+        handlePartiallyReceivedChange={handlePartiallyReceivedChange}
+        handleCompletelyReceivedChange={handleCompletelyReceivedChange}
       />
       {renderPagination()}
       <StockAvailabilityDialog
@@ -436,18 +498,18 @@ const BottleOrders = ({ orderType = 'pending' }) => {
         handleStockYes={handleStockYes}
         getRemainingQty={getRemainingQty}
         setStockQuantities={setStockQuantities}
-        aggregatedBottles={aggregatedBottles}
+        aggregatedPrintings={aggregatedPrintings}
         searchTerm={searchTerm}
       />
       {showModal && selectedOrder && selectedItem && (
-        <UpdateBottleQty
+        <UpdatePrintingQty
           isOpen={showModal}
           onClose={handleClose}
           orderData={selectedOrder}
           itemData={selectedItem}
           stockQuantities={stockQuantities}
           onUpdate={handleLocalOrderUpdate}
-          aggregatedBottles={aggregatedBottles}
+          aggregatedPrintings={aggregatedPrintings}
           searchTerm={searchTerm}
         />
       )}
@@ -455,4 +517,4 @@ const BottleOrders = ({ orderType = 'pending' }) => {
   );
 };
 
-export default BottleOrders;
+export default PrintingOrders;

@@ -24,7 +24,7 @@ const SharedHeader = ({
 
   return (
     <header className={headerClasses}>
-      <div className="px-3 sm:px-4 py-2 h-12 sm:h-12">
+      <div className="px-3 sm:px-4 py-2 h-10 sm:h-12">
         <div className="flex items-center justify-between h-full">
           <div className="flex items-center space-x-2 sm:space-x-3 ml-4">
             {showGradient && <img src="./p_logo.png" alt="logo" className="h-6 sm:h-7" />}
