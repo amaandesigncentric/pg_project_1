@@ -3,19 +3,7 @@ import { FaPlusCircle } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
 import { useSocket } from '../context/socketContext';
 
-const AccessoryForm = ({ onAmountChange }) => {
-    const [accessories, setAccessories] = useState([
-        {
-            accessoryName: '',
-            searchTerm: '',
-            isDropdownVisible: false,
-            boxCode: '',
-            boxName: '',
-            accessoryQuantity: '',
-            accessoryRate: '',
-            amount:0
-        },
-    ]);
+const AccessoryForm = ({ accessories, onAmountChange ,onAccesoryChange}) => {
 
     const {accessories:accessoryData} = useSocket();
 
@@ -35,7 +23,7 @@ const AccessoryForm = ({ onAmountChange }) => {
             updated[index].amount = (quantity / 1000) * rate;
         }
 
-        setAccessories(updated);
+        onAccesoryChange(updated);
     };
 
     const handleAccessorySelect = (index, item) => {
@@ -43,7 +31,7 @@ const AccessoryForm = ({ onAmountChange }) => {
         updated[index].accessoryName = item.ITEMNAME;
         updated[index].searchTerm = item.ITEMNAME;
         updated[index].isDropdownVisible = false;
-        setAccessories(updated);
+        onAccesoryChange(updated);
     };
 
       React.useEffect(() => {
@@ -52,7 +40,7 @@ const AccessoryForm = ({ onAmountChange }) => {
       }, [accessories, onAmountChange]);
 
     const addAccessory = () => {
-        setAccessories([
+        onAccesoryChange([
             ...accessories,
             {
                 accessoryName: '',
@@ -66,7 +54,7 @@ const AccessoryForm = ({ onAmountChange }) => {
 
     const deleteAccessory = (index) => {
         const updated = accessories.filter((_, i) => i !== index);
-        setAccessories(updated);
+        onAccesoryChange(updated);
     };
 
     return (
@@ -190,7 +178,6 @@ const AccessoryForm = ({ onAmountChange }) => {
                             <input
                                 type="number"
                                 min="0"
-                                step="0.01"
                                 value={accessory.accessoryRate}
                                 onChange={(e) => handleAccessoryChange(index, 'accessoryRate', e.target.value)}
                                 className="w-full px-4 py-3 border border-orange-300 rounded-md text-sm bg-white focus:outline-none"

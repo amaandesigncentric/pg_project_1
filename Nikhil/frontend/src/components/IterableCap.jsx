@@ -4,22 +4,8 @@ import { MdDelete } from 'react-icons/md';
 import capData from '../constants/capData'; 
 import { useSocket } from '../context/socketContext';
 
-const CapForm = ({onAmountChange}) => {
-  const [caps, setCaps] = useState([
-    {
-      capType: '',
-      capName: '',
-      searchTerm: '',
-      isDropdownVisible: false,
-      process: '',
-      quantity: '',
-      rate: '',
-      pantoneNo: '',
-      fitment: '',
-      assemble: '',
-      amount:0
-    },
-  ]);
+const CapForm = ({caps, onAmountChange ,onCapsChange}) => {
+
   const { plasticCap:plasticCapData ,alluminiumCap :alluminiumCapData} = useSocket();
 
   const handleCapChange = (index, key, value) => {
@@ -29,6 +15,7 @@ const CapForm = ({onAmountChange}) => {
     if (key === 'capType') {
       updated[index]['capName'] = '';
       updated[index]['process'] = '';
+      updated[index]["searchTerm"] = ""
     }
 
     if (key === 'quantity' || key === 'rate') {
@@ -37,7 +24,7 @@ const CapForm = ({onAmountChange}) => {
       updated[index].amount = (quantity / 1000) * rate;
     }
 
-    setCaps(updated);
+    onCapsChange(updated);
   };
 
   React.useEffect(() => {
@@ -45,7 +32,7 @@ const CapForm = ({onAmountChange}) => {
     onAmountChange(total);
   }, [caps, onAmountChange]);
   const addCap = () => {
-    setCaps([
+    onCapsChange([
       ...caps,
       {
         capType: '',
@@ -62,7 +49,7 @@ const CapForm = ({onAmountChange}) => {
 
   const deleteCap = (index) => {
     const updated = caps.filter((_, i) => i !== index);
-    setCaps(updated);
+    onCapsChange(updated);
   };
 
   const handleCapSelect = (index, selectedCap) => {
@@ -70,7 +57,7 @@ const CapForm = ({onAmountChange}) => {
   updated[index].capName = selectedCap.ITEMNAME;
   updated[index].searchTerm = selectedCap.ITEMNAME;
   updated[index].isDropdownVisible = false;
-  setCaps(updated);
+  onCapsChange(updated);
 };
 
   return (
@@ -252,7 +239,6 @@ const CapForm = ({onAmountChange}) => {
               <input
                 type="number"
                 min="0"
-                step="0.01"
                 value={cap.rate}
                 onChange={(e) => handleCapChange(index, 'rate', e.target.value)}
                 className="w-full px-4 py-3 border border-orange-300 rounded-md text-sm bg-white"

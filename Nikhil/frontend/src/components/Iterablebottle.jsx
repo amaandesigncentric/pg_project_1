@@ -3,24 +3,11 @@ import { FaPlusCircle } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
 import DECORATION_COMBINATIONS from '../constants/decoData';
 import { useSocket } from '../context/socketContext';
-const BottleForm = ({onAmountChange}) => {
+const BottleForm = ({ bottles, onAmountChange ,onBottlesChange}) => {
   const { bottles:bottleData} = useSocket();
-  const [bottles, setBottles] = useState([
-    {
-      bottleName: '',
-      neckSize: '',
-      bootleCapacity: '',
-      bootleDecoration: '',
-      decoNumber: '',
-      quantity: '',
-      rate: '',
-      searchTerm: '',
-      isDropdownVisible: false,
-      amount:0
-    },
-  ]);
 
-  const handleBottleChange = (index, key, value) => {
+
+   const handleBottleChange = (index, key, value) => {
     const updated = [...bottles];
     updated[index][key] = value;
 
@@ -29,7 +16,7 @@ const BottleForm = ({onAmountChange}) => {
       const rate = parseFloat(updated[index].rate) || 0;
       updated[index].amount = (quantity / 1000) * rate;
     }
-    setBottles(updated);
+    onBottlesChange(updated);
   };
 
   React.useEffect(() => {
@@ -44,12 +31,12 @@ const handleBottleSelect = (index, selectedBottle) => {
   updated[index].bootleCapacity = selectedBottle.capacity;
   updated[index].searchTerm = selectedBottle.FORMULA;
   updated[index].isDropdownVisible = false;
-  setBottles(updated);
+  onBottlesChange(updated);
 };
 
 
   const addBottle = () => {
-    setBottles([
+    onBottlesChange([
       ...bottles,
       {
         bottleName: '',
@@ -67,7 +54,7 @@ const handleBottleSelect = (index, selectedBottle) => {
 
   const deleteBottle = (index) => {
     const updated = bottles.filter((_, i) => i !== index);
-    setBottles(updated);
+    onBottlesChange(updated);
   };
 
   return (
@@ -76,7 +63,6 @@ const handleBottleSelect = (index, selectedBottle) => {
         const filteredBottles = bottleData.filter((b) =>
           b.FORMULA.toLowerCase().includes(bottle.searchTerm.toLowerCase())
         );
-        console.log(filteredBottles,"filterBottles")
         return (
           <div className="relative mb-6">
             <div className="absolute top-0 right-0 flex space-x-1 -mt-2 -mr-3">
@@ -222,7 +208,6 @@ const handleBottleSelect = (index, selectedBottle) => {
                 <input
                   type="number"
                   min="0"
-                  step="0.01"
                   value={bottle.rate}
                   onChange={(e) => handleBottleChange(index, 'rate', e.target.value)}
                   className="w-full px-4 py-3 border border-orange-300 rounded-md text-sm bg-white"

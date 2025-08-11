@@ -3,17 +3,8 @@ import { FaPlusCircle } from 'react-icons/fa';
 import { MdDelete } from 'react-icons/md';
 import { useSocket } from '../context/socketContext';
 
-const PumpForm = ({ onAmountChange }) => {
-  const [pumps, setPumps] = useState([
-    {
-      pumpName: '',
-      pumpQuantity: '',
-      pumpRate: '',
-      searchTerm: '',
-      isDropdownVisible: false,
-      amount: 0
-    },
-  ]);
+const PumpForm = ({ pumps , onAmountChange ,onPumpsChange}) => {
+
 
   const { pumps: pumpData } = useSocket();
   const handlePumpChange = (index, key, value) => {
@@ -26,7 +17,7 @@ const PumpForm = ({ onAmountChange }) => {
       updated[index].amount = (quantity / 1000) * rate;
     }
 
-    setPumps(updated);
+    onPumpsChange(updated);
   };
 
   const handlePumpSelect = (index, pump) => {
@@ -34,7 +25,7 @@ const PumpForm = ({ onAmountChange }) => {
     updated[index].pumpName = pump.ITEMNAME;
     updated[index].searchTerm = pump.ITEMNAME;
     updated[index].isDropdownVisible = false;
-    setPumps(updated);
+    onPumpsChange(updated);
   };
 
 
@@ -43,7 +34,7 @@ const PumpForm = ({ onAmountChange }) => {
     onAmountChange(total);
   }, [pumps, onAmountChange]);
   const addPump = () => {
-    setPumps([
+    onPumpsChange([
       ...pumps,
       {
         pumpName: '',
@@ -55,7 +46,7 @@ const PumpForm = ({ onAmountChange }) => {
 
   const deletePump = (index) => {
     const updated = pumps.filter((_, i) => i !== index);
-    setPumps(updated);
+    onPumpsChange(updated);
   };
 
   return (
@@ -142,7 +133,7 @@ const PumpForm = ({ onAmountChange }) => {
 
             {/* Pump Quantity */}
             <div className="lg:col-span-3">
-              <label className="block text-sm font-medium text-orange-800 mb-2">Pump Quantity</label>
+              <label className="block text-sm font-medium text-orange-800 mb-2">Quantity</label>
               <input
                 type="number"
                 min="0"
@@ -154,11 +145,10 @@ const PumpForm = ({ onAmountChange }) => {
 
             {/* Pump Rate */}
             <div className="lg:col-span-3">
-              <label className="block text-sm font-medium text-orange-800 mb-2">Pump Rate</label>
+              <label className="block text-sm font-medium text-orange-800 mb-2">Rate</label>
               <input
                 type="number"
                 min="0"
-                step="0.01"
                 value={pump.pumpRate}
                 onChange={(e) => handlePumpChange(index, 'pumpRate', e.target.value)}
                 className="w-full px-4 py-3 border border-orange-300 rounded-md text-sm bg-white focus:outline-none"
