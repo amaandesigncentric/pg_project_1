@@ -136,7 +136,7 @@ const UpdatePrintingQty = ({ isOpen, onClose, orderData, itemData, stockQuantiti
         }
       }
 
-      const response = await axios.patch('http://localhost:3001/api/printing/update-progress', {
+      const response = await axios.patch('https://pragati-dummy-server.onrender.com/api/printing/update-progress', {
         orderNumber: orderData.order_number,
         itemId: itemData._id,
         updates

@@ -60,7 +60,7 @@ export const moveOrderInStorage = (team, orderNumber, fromStatus, toStatus) => {
 export const initializeLocalStorage = async (team, isOrderCompletedFn, filterOrderFn) => {
   const keys = getStorageKeys(team);
 
-  const response = await fetch('http://localhost:3001/api/orders');
+  const response = await fetch('https://pragati-dummy-server.onrender.com/api/orders');
   if (!response.ok) throw new Error('Failed to fetch orders');
   const allOrders = await response.json() || [];
 

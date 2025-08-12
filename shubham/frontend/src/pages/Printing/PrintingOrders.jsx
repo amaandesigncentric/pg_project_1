@@ -4,7 +4,7 @@ import { getLocalStorageData, getStorageKeys, initializeLocalStorage, moveOrderI
 import TeamSearchAggregation from '../../utils/TeamSearchAggregation.jsx';
 import UpdatePrintingQty from './components/UpdatePrintingQty.jsx';
 import StockAvailabilityDialog from './components/StockAvailabilityDialog.jsx';
-import OrderTable from './components/orderTable.jsx';
+import OrderTable from './components/OrderTable.jsx';
 
 const PrintingOrders = ({ orderType = 'pending' }) => {
   const [orders, setOrders] = useState([]);

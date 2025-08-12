@@ -9,11 +9,11 @@ import FoilingDashboard from './pages/Foiling/FoilingDashboard.jsx'
 const App = () => {
   return (
     <div className='text-red-200'>
-      {/* <Dashboard /> */}
+      <Dashboard />
       {/* <BottleDashboard /> */}
       {/* <PrintingDashboard /> */}
       {/* <CoatingDashbaord /> */}
-      <FoilingDashboard />
+      {/* <FoilingDashboard /> */}
     </div>
   )
 }

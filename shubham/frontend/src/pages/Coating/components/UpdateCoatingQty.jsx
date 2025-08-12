@@ -136,7 +136,7 @@ const UpdateCoatingQty = ({ isOpen, onClose, orderData, itemData, stockQuantitie
         }
       }
 
-      const response = await axios.patch('http://localhost:3001/api/coating/update-progress', {
+      const response = await axios.patch('https://pragati-dummy-server.onrender.com/api/coating/update-progress', {
         orderNumber: orderData.order_number,
         itemId: itemData._id,
         updates

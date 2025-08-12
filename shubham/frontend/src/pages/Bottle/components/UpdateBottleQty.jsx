@@ -131,7 +131,7 @@ const UpdateBottleQty = ({ isOpen, onClose, orderData, itemData, stockQuantities
         }
       }
 
-      const response = await axios.patch('http://localhost:3001/api/bottles/update-progress', {
+      const response = await axios.patch('https://pragati-dummy-server.onrender.com/api/bottles/update-progress', {
         orderNumber: orderData.order_number,
         itemId: itemData._id,
         updates
