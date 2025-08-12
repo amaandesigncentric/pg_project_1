@@ -5,9 +5,8 @@ import IterableItems from "../../components/IterableItems";
 import ModernPriceDisplay from "../../components/PriceDisplay";
 
 
-const Createordermodal = ({ setOpenCreateOrder, openCreateOrder }) => {
+const Createordermodal = ({ orderNumber, setOpenCreateOrder, openCreateOrder }) => {
   const { user } = useAuth();
-  const [orderNumber, setOrderNumber] = React.useState(null);
   const [customerName, setCustomerName] = React.useState("");
   const [currency, setCurrency] = React.useState("INR");
   const [exchangeRates, setExchangeRates] = React.useState({
@@ -19,6 +18,57 @@ const Createordermodal = ({ setOpenCreateOrder, openCreateOrder }) => {
   const [items, setItems] = React.useState([
     {
       id: Date.now(),
+      bottles: [
+        {
+          bottleName: '',
+          neckSize: '',
+          bootleCapacity: '',
+          bootleDecoration: '',
+          decoNumber: '',
+          quantity: '',
+          rate: '',
+          searchTerm: '',
+          isDropdownVisible: false,
+          amount: 0
+        },
+      ],
+      caps: [
+        {
+          capType: '',
+          capName: '',
+          searchTerm: '',
+          isDropdownVisible: false,
+          process: '',
+          quantity: '',
+          rate: '',
+          pantoneNo: '',
+          fitment: '',
+          assemble: '',
+          amount: 0
+        },
+      ],
+      pumps:[
+        {
+          pumpName: '',
+          pumpQuantity: '',
+          pumpRate: '',
+          searchTerm: '',
+          isDropdownVisible: false,
+          amount: 0
+        },
+      ],
+      accessories:[
+          {
+              accessoryName: '',
+              searchTerm: '',
+              isDropdownVisible: false,
+              boxCode: '',
+              boxName: '',
+              accessoryQuantity: '',
+              accessoryRate: '',
+              amount:0
+          },
+      ],
       bottleAmount: 0,
       capAmount: 0,
       pumpAmount: 0,
@@ -26,11 +76,46 @@ const Createordermodal = ({ setOpenCreateOrder, openCreateOrder }) => {
       totalAmount: 0,
     },
   ]);
-  const [showDuplicate ,setShowDuplicate] = React.useState(false);
-  const [duplicateOrderNumber ,setDuplicateOrderNumber] = React.useState("");
-  const [duplicateError,setDuplicateError] = React.useState("");
+  const [showDuplicate, setShowDuplicate] = React.useState(false);
+  const [duplicateOrderNumber, setDuplicateOrderNumber] = React.useState("");
+  const [duplicateError, setDuplicateError] = React.useState("");
   const duplicateAction = () => {
   };
+const createOrderAction = async () => {
+  const cleanedItems = {
+    order_number: orderNumber,
+    manager_name: user?.username || "",
+    order_status: "Pending",
+    customer_name: customerName,
+    items: items.map((order, index) => ({
+      id: order.id,
+      item_name: `item_${index + 1}`,
+      bottles: order.bottles.map(({ isDropdownVisible, searchTerm,amount , ...rest }) => rest),
+      caps: order.caps.map(({ isDropdownVisible, searchTerm,amount, ...rest }) => rest),
+      pumps: order.pumps.map(({ isDropdownVisible, searchTerm,amount, ...rest }) => rest),
+      accessories: order.accessories.map(({ isDropdownVisible, searchTerm, ...rest }) => rest),
+    })),
+  };
+
+  console.log(cleanedItems, "cleanedItems");
+
+  try {
+    const res = await fetch("http://localhost:5000/order/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(cleanedItems),
+    });
+
+    const data = await res.json();
+    console.log("Server response:", data);
+  } catch (error) {
+    console.error("Error sending order:", error);
+  }
+};
+
+
+
+
 
   return (
     <Dialog open={openCreateOrder} onClose={() => setOpenCreateOrder(false)} className="relative z-10">
@@ -48,71 +133,71 @@ const Createordermodal = ({ setOpenCreateOrder, openCreateOrder }) => {
                         </h3>
                       </div>
                     </DialogTitle>
-                  <div className="mt-5">
-                    <div className="bg-[#FFF0E7] p-3 rounded-md">
-                      <div className="flex items-center justify-between ">
-                        <h4 className=" text-orange-800 font-medium">Do you want to duplicate an existing order?</h4>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setShowDuplicate(!showDuplicate);
-                            setDuplicateError("");
-                            setDuplicateOrderNumber("");
-                          }}
-                          className={`cursor-pointer flex items-center gap-2 px-2 py-1 rounded-sm transition-colors duration-200 font-medium ${showDuplicate
-                            ? "bg-transparent"
-                            : "bg-orange-700 text-white hover:bg-red-900 hover:text-white shadow-md"
-                            }`}
-                        >
-                          {showDuplicate ? (
-                            <div className="w-5 h-5 rounded-full border-2 border-red-500 flex items-center justify-center">
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </div>
-                          ) : (
-                            "Yes, duplicate order"
-                          )}
-                        </button>
-                      </div>
+                    <div className="mt-5">
+                      <div className="bg-[#FFF0E7] p-3 rounded-md">
+                        <div className="flex items-center justify-between ">
+                          <h4 className=" text-orange-800 font-medium">Do you want to duplicate an existing order?</h4>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowDuplicate(!showDuplicate);
+                              setDuplicateError("");
+                              setDuplicateOrderNumber("");
+                            }}
+                            className={`cursor-pointer flex items-center gap-2 px-2 py-1 rounded-sm transition-colors duration-200 font-medium ${showDuplicate
+                              ? "bg-transparent"
+                              : "bg-orange-700 text-white hover:bg-red-900 hover:text-white shadow-md"
+                              }`}
+                          >
+                            {showDuplicate ? (
+                              <div className="w-5 h-5 rounded-full border-2 border-red-500 flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </div>
+                            ) : (
+                              "Yes, duplicate order"
+                            )}
+                          </button>
+                        </div>
 
-                      {showDuplicate && (
-                        <div className="space-y-4 mt-4">
-                          <div className="flex gap-3">
-                            <div className="flex-1">
-                              <input
-                                type="text"
-                                value={duplicateOrderNumber}
-                                onChange={(e) => setDuplicateOrderNumber(e.target.value)}
-                                placeholder="Enter order number to duplicate"
-                                className="w-full px-4 py-3 border border-orange-300 rounded-md text-sm 
+                        {showDuplicate && (
+                          <div className="space-y-4 mt-4">
+                            <div className="flex gap-3">
+                              <div className="flex-1">
+                                <input
+                                  type="text"
+                                  value={duplicateOrderNumber}
+                                  onChange={(e) => setDuplicateOrderNumber(e.target.value)}
+                                  placeholder="Enter order number to duplicate"
+                                  className="w-full px-4 py-3 border border-orange-300 rounded-md text-sm 
                       focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-colors
                       placeholder:text-gray-400 z-50"
-                              />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={()=>{console.log("Duplicate Order")}}
-                              className="px-3 py-2 cursor-pointer bg-orange-700 rounded-sm shadow-md transition-colors duration-200  hover:bg-red-900 text-white font-medium to-[#FFB84D] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                            >
+                                />
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => { console.log("Duplicate Order") }}
+                                className="px-3 py-2 cursor-pointer bg-orange-700 rounded-sm shadow-md transition-colors duration-200  hover:bg-red-900 text-white font-medium to-[#FFB84D] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                              >
                                 <>
                                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                   </svg>
                                   Search
                                 </>
-                            </button>
-                          </div>
-
-                          {duplicateError && (
-                            <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">
-                              {duplicateError}
+                              </button>
                             </div>
-                          )}
-                        </div>
-                      )}
+
+                            {duplicateError && (
+                              <div className="text-red-600 text-sm bg-red-50 border border-red-200 rounded px-3 py-2">
+                                {duplicateError}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
 
                     <div className="mt-6 sm:text-left w-full">
                       <div className="p-3 rounded-md flex flex-col md:flex-row bg-[#FFF0E7] gap-4 md:gap-x-8">
@@ -183,19 +268,18 @@ const Createordermodal = ({ setOpenCreateOrder, openCreateOrder }) => {
                     />
 
 
-                      <div className="flex justify-end gap-3 mt-8">
+                    <div className="flex justify-end gap-3 mt-8">
                       <button
                         className="inline-flex justify-center px-6 py-3 text-sm font-medium text-orange-900 bg-white border border-orange-300 rounded-md shadow-sm hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-                        disabled
+                        onClick={()=>{setOpenCreateOrder(false)}}
                       >
                         Cancel
                       </button>
 
 
                       <button
-                      className="inline-flex justify-center px-6 py-3 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 "
-                      disabled
-                      >
+                        className="inline-flex justify-center px-6 py-3 text-sm font-medium text-white bg-orange-600 hover:bg-orange-700 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 "
+                        onClick={()=>{ createOrderAction()}}                      >
                         Create Order
                       </button>
                     </div>

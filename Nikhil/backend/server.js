@@ -3,7 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { connectToDatabase } from "./utils/database.js";
 import userRoutes from "./routes/userData-routes.js";
-import generalRoute from "./routes/general-routes.js"
+import generalRoute from "./routes/general-routes.js";
+import orderRoutes from "./routes/order-routes.js";
 
 dotenv.config();
 
@@ -22,6 +23,7 @@ app.use(express.json());
 connectToDatabase().then(() => {
   app.use("/user", userRoutes);
   app.use("/general",generalRoute);
+  app.use("/order",orderRoutes)
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });

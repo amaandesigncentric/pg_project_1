@@ -7,7 +7,7 @@ import pumpData from "../constants/pumpData";
 
 import IterableBottle from "./Iterablebottle";
 import IterableCap from "./IterableCap";
-import IterablePump from "./IerablePump";
+import IterablePump from "./IterablePump";
 import IterableAccessory from "./IterableAccesory";
 import { MdDelete } from "react-icons/md";
 
@@ -57,14 +57,65 @@ const IterableItems = ({ currency ,items ,setItems ,exchangeRates ,setExchangeRa
   const addItem = () => {
     setItems((prev) => [
       ...prev,
-      {
-        id: Date.now() + Math.random(),
-        bottleAmount: 0,
-        capAmount: 0,
-        pumpAmount: 0,
-        accessoryAmount: 0,
-        totalAmount: 0,
-      },
+          {
+      id: Date.now(),
+      bottles: [
+        {
+          bottleName: '',
+          neckSize: '',
+          bootleCapacity: '',
+          bootleDecoration: '',
+          decoNumber: '',
+          quantity: '',
+          rate: '',
+          searchTerm: '',
+          isDropdownVisible: false,
+          amount: 0
+        },
+      ],
+      caps: [
+        {
+          capType: '',
+          capName: '',
+          searchTerm: '',
+          isDropdownVisible: false,
+          process: '',
+          quantity: '',
+          rate: '',
+          pantoneNo: '',
+          fitment: '',
+          assemble: '',
+          amount: 0
+        },
+      ],
+      pumps:[
+        {
+          pumpName: '',
+          pumpQuantity: '',
+          pumpRate: '',
+          searchTerm: '',
+          isDropdownVisible: false,
+          amount: 0
+        },
+      ],
+      accessories:[
+          {
+              accessoryName: '',
+              searchTerm: '',
+              isDropdownVisible: false,
+              boxCode: '',
+              boxName: '',
+              accessoryQuantity: '',
+              accessoryRate: '',
+              amount:0
+          },
+      ],
+      bottleAmount: 0,
+      capAmount: 0,
+      pumpAmount: 0,
+      accessoryAmount: 0,
+      totalAmount: 0,
+    }
     ]);
   };
 
@@ -217,7 +268,18 @@ const IterableItems = ({ currency ,items ,setItems ,exchangeRates ,setExchangeRa
               </h1>
               <IterableBottle
                 bootleData={bottleData}
+                bottles={item.bottles}
                 decorationOptions={DECORATION_COMBINATIONS}
+                onBottlesChange={(updatedBottles) => {
+                  const updatedItems = items.map((it) => {
+                    if (it.id === item.id) {
+                      return { ...it, bottles: updatedBottles };
+                    }
+                    return it;
+                  });
+                  console.log(updatedItems,"updated Items")
+                  setItems(updatedItems);
+                }}
                 onAmountChange={(amount) =>
                   handleAmountChange(item.id, "bottleAmount", amount)
                 }
@@ -230,9 +292,20 @@ const IterableItems = ({ currency ,items ,setItems ,exchangeRates ,setExchangeRa
               </h1>
               <IterableCap
                 capData={capData}
+                caps={item.caps}
                 onAmountChange={(amount) =>
                   handleAmountChange(item.id, "capAmount", amount)
                 }
+                onCapsChange={(updatedBottles) => {
+                  const updatedItems = items.map((it) => {
+                    if (it.id === item.id) {
+                      return { ...it, caps: updatedBottles };
+                    }
+                    return it;
+                  });
+                  console.log(updatedItems,"updated Items")
+                  setItems(updatedItems);
+                }}
               />
             </div>
 
@@ -242,9 +315,20 @@ const IterableItems = ({ currency ,items ,setItems ,exchangeRates ,setExchangeRa
               </h1>
               <IterablePump
                 pumpData={pumpData}
+                pumps={item.pumps}
                 onAmountChange={(amount) =>
                   handleAmountChange(item.id, "pumpAmount", amount)
                 }
+                onPumpsChange={(updatedBottles) => {
+                  const updatedItems = items.map((it) => {
+                    if (it.id === item.id) {
+                      return { ...it, pumps: updatedBottles };
+                    }
+                    return it;
+                  });
+                  console.log(updatedItems,"updated Items")
+                  setItems(updatedItems);
+                }}
               />
             </div>
 
@@ -253,9 +337,20 @@ const IterableItems = ({ currency ,items ,setItems ,exchangeRates ,setExchangeRa
                 Team-Accessory
               </h1>
               <IterableAccessory
+                accessories={item.accessories}
                 onAmountChange={(amount) =>
                   handleAmountChange(item.id, "accessoryAmount", amount)
                 }
+                onAccesoryChange={(updatedBottles) => {
+                const updatedItems = items.map((it) => {
+                  if (it.id === item.id) {
+                    return { ...it, accessories: updatedBottles };
+                  }
+                  return it;
+                });
+                console.log(updatedItems,"updated Items")
+                setItems(updatedItems);
+                }}
               />
             </div>
           </div>
